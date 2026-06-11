@@ -120,7 +120,12 @@
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1">Nomor WA Admin (Proses Orderan)</label>
                                 <input type="text" id="sett-shop-phone" placeholder="Contoh: 628123456789" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
-                                <span class="text-[10px] text-gray-500">*Gunakan kode negara (62), jangan pakai 0 atau +.</span>
+                                <span class="text-[10px] text-gray-500">*Gunakan kode negara (62).</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Biaya Admin / Biaya Layanan (Rp)</label>
+                                <input type="number" id="sett-admin-fee" placeholder="Contoh: 1000" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
                             </div>
                             
                             <div>
@@ -166,7 +171,7 @@
                                     <input type="text" id="prod-item-name" placeholder="86 Diamonds, Weekly" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-gray-400 mb-1">Harga Jual (Rp)</label>
+                                    <label class="block text-xs text-gray-400 mb-1">Harga Dasar Jual (Rp)</label>
                                     <input type="number" id="prod-price" placeholder="20000" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
                                 </div>
                             </div>
@@ -208,6 +213,7 @@
         let state = {
             shopName: localStorage.getItem('shopName') || 'Sipira Topup',
             shopPhone: localStorage.getItem('shopPhone') || '',
+            adminFee: parseInt(localStorage.getItem('adminFee')) || 0,
             popupLink: localStorage.getItem('popupLink') || '',
             musicLink: localStorage.getItem('musicLink') || '',
             isMaintenance: localStorage.getItem('isMaintenance') === 'true',
@@ -229,6 +235,8 @@
             document.getElementById('sett-shop-name').value = state.shopName;
 
             document.getElementById('sett-shop-phone').value = state.shopPhone;
+            document.getElementById('sett-admin-fee').value = state.adminFee;
+            
             const waBadge = document.getElementById('shop-wa-badge');
             if(state.shopPhone) {
                 document.getElementById('shop-wa-number').innerText = '+' + state.shopPhone;
@@ -295,6 +303,7 @@
             }
         }
 
+        // FUNGSI LOGIN: Menggunakan password baru 'adm1n'
         function handleLogin() {
             const user = document.getElementById('login-user').value;
             const pass = document.getElementById('login-pass').value;
@@ -327,11 +336,15 @@
             let phoneInput = document.getElementById('sett-shop-phone').value.trim();
             phoneInput = phoneInput.replace(/[^0-9]/g, '');
 
+            let feeInput = parseInt(document.getElementById('sett-admin-fee').value) || 0;
+
             state.shopPhone = phoneInput;
+            state.adminFee = feeInput;
             state.popupLink = document.getElementById('sett-popup-link').value;
             state.musicLink = document.getElementById('sett-music-link').value;
             
             localStorage.setItem('shopPhone', state.shopPhone);
+            localStorage.setItem('adminFee', state.adminFee);
             localStorage.setItem('popupLink', state.popupLink);
             localStorage.setItem('musicLink', state.musicLink);
             
@@ -345,7 +358,6 @@
             applyState();
         }
 
-        // Generator Logo Game Otomatis Berdasarkan Nama Game
         function generateAutoLogoHTML(gameName) {
             const colors = [
                 'from-blue-600 to-indigo-900',
@@ -355,11 +367,8 @@
                 'from-cyan-600 to-blue-900',
                 'from-fuchsia-600 to-purple-900'
             ];
-            // Pilih warna secara acak stabil berdasarkan panjang nama game
             const colorIdx = gameName.length % colors.length;
             const chosenColor = colors[colorIdx];
-            
-            // Ambil inisial nama game (Misal Mobile Legends -> ML)
             const initials = gameName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 3);
 
             return `
@@ -370,7 +379,6 @@
             `;
         }
 
-        // Manajemen Aset Produk Game
         function renderProducts() {
             const shopGrid = document.getElementById('products-list');
             const adminList = document.getElementById('admin-products-list');
@@ -385,25 +393,30 @@
                 emptyState.style.display = 'none';
                 
                 state.products.forEach((product, index) => {
-                    const formattedPrice = parseInt(product.price).toLocaleString('id-ID');
-                    const textWA = `Halo Admin, saya mau Order Top Up Game:\n\n🎮 *Game:* ${product.gameName}\n💎 *Nominal/Item:* ${product.itemName}\n💰 *Harga:* Rp ${formattedPrice}\n\n📝 *Data Akun Anda (Isi Sendiri):*\n• ID/User ID:\n• Zone ID / Server:\n• Nickname:`;
+                    const basePrice = parseInt(product.price);
+                    const finalPrice = basePrice + state.adminFee;
+
+                    const formattedBasePrice = basePrice.toLocaleString('id-ID');
+                    const formattedAdminFee = state.adminFee.toLocaleString('id-ID');
+                    const formattedFinalPrice = finalPrice.toLocaleString('id-ID');
+                    
+                    const textWA = `Halo Admin, saya mau Order Top Up Game:\n\n🎮 *Game:* ${product.gameName}\n💎 *Nominal/Item:* ${product.itemName}\n\n💵 *Rincian Pembayaran:*\n• Harga Item: Rp ${formattedBasePrice}\n• Biaya Admin: Rp ${formattedAdminFee}\n💰 *Total Bayar:* Rp ${formattedFinalPrice}\n\n📝 *Data Akun Anda (Isi Sendiri):*\n• ID/User ID:\n• Zone ID / Server:\n• Nickname:`;
                     const waLink = state.shopPhone ? `https://wa.me/${state.shopPhone}?text=${encodeURIComponent(textWA)}` : '#';
 
-                    // Render untuk Tampilan Jualan Game (Tab 1) dengan Logo Otomatis
                     const prodCard = document.createElement('div');
                     prodCard.className = "glass rounded-xl overflow-hidden shadow-lg hover:scale-[1.02] transition-all flex flex-col justify-between group border border-purple-900/20";
                     prodCard.innerHTML = `
                         <div class="relative overflow-hidden aspect-square bg-gray-900">
                             ${generateAutoLogoHTML(product.gameName)}
                             <span class="absolute top-2 left-2 bg-black/60 text-[9px] uppercase font-bold px-2 py-0.5 rounded text-white tracking-wider backdrop-blur-sm">
-                                OFFICIAL
+                                + Admin Rp ${formattedAdminFee}
                             </span>
                         </div>
                         <div class="p-4 flex flex-col flex-grow justify-between">
                             <h4 class="font-bold text-sm text-gray-100 line-clamp-1 mb-1">${product.itemName}</h4>
                             <p class="text-xs text-gray-400 mb-2">${product.gameName}</p>
                             <div>
-                                <p class="text-sky-400 font-bold text-base">Rp ${formattedPrice}</p>
+                                <p class="text-sky-400 font-bold text-base">Rp ${formattedFinalPrice}</p>
                                 <a href="${waLink}" target="${state.shopPhone ? '_blank' : '_self'}" onclick="${!state.shopPhone ? "alert('Nomor WA proses orderan belum di-set di panel admin!'); return false;" : ""}" class="block text-center w-full mt-3 bg-gradient-to-r from-purple-700 to-indigo-700 text-xs py-2 rounded-lg font-semibold group-hover:from-sky-500 group-hover:to-blue-600 transition-all text-white decoration-transparent shadow-md">
                                     ⚡ Top Up
                                 </a>
@@ -412,7 +425,6 @@
                     `;
                     shopGrid.appendChild(prodCard);
 
-                    // Render untuk Tampilan List Manajemen di Admin (Tab 2)
                     const adminRow = document.createElement('div');
                     adminRow.className = "flex items-center justify-between p-2 bg-gray-900/50 rounded-lg border border-gray-800";
                     adminRow.innerHTML = `
@@ -422,7 +434,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-white">${product.itemName} <span class="text-xs text-gray-500">(${product.gameName})</span></p>
-                                <p class="text-xs text-sky-400">Rp ${formattedPrice}</p>
+                                <p class="text-xs text-gray-400">Dasar: Rp ${formattedBasePrice} | Jual (+Fee): <span class="text-sky-400 font-semibold">Rp ${formattedFinalPrice}</span></p>
                             </div>
                         </div>
                         <button onclick="deleteProduct(${index})" class="text-xs bg-red-900/40 text-red-400 border border-red-900 px-2 py-1 rounded hover:bg-red-600 hover:text-white transition-all">Hapus</button>
@@ -438,7 +450,7 @@
             const price = document.getElementById('prod-price').value.trim();
 
             if(!gameName || !itemName || !price) {
-                alert('Mohon isi semua data produk game (Nama Game, Item, & Harga)!');
+                alert('Mohon isi semua data produk game (Nama Game, Item, & Harga Dasar)!');
                 return;
             }
 
