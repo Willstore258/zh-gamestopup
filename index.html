@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="site-title">Sipira Topup</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <audio id="bg-music" loop></audio>
+
+    <header class="glass sticky top-0 z-40 px-6 py-4 flex flex-col sm:flex-row gap-4 justify-between items-center shadow-lg border-b border-purple-900/30">
+        <div class="flex items-center gap-4">
+            <h1 id="brand-name" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-sky-400 bg-clip-text text-transparent transition-all">Sipira Topup</h1>
+            <a id="shop-wa-badge" href="#" target="_blank" class="hidden items-center gap-1 bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full border border-emerald-500/20 font-medium hover:bg-emerald-500/20 transition-all">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                WA Admin: <span id="shop-wa-number"></span>
+            </a>
+        </div>
+        <nav class="flex gap-2">
+            <button onclick="switchTab('shop')" id="btn-tab-shop" class="px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md transition-all">
+                🎮 Toko Game
+            </button>
+            <button onclick="switchTab('admin')" id="btn-tab-admin" class="px-4 py-2 rounded-lg font-medium text-gray-400 hover:text-white transition-all">
+                ⚙️ Admin Panel
+            </button>
+        </nav>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+
+        <section id="tab-shop" class="tab-content">
+            <div id="maintenance-mode" class="hidden flex-col items-center justify-center py-20 text-center">
+                <div class="text-6xl mb-4">🛠️</div>
+                <h2 class="text-3xl font-bold text-amber-400 mb-2">Website Sedang Maintenance</h2>
+                <p class="text-gray-400 max-w-md">Kami sedang memperbarui sistem harga dan produk game. Silakan kembali beberapa saat lagi.</p>
+            </div>
+
+            <div id="shop-content">
+                <div id="hero-banner-container" class="hidden mb-8 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/20">
+                    <img id="hero-banner-img" src="" alt="Promo Banner" class="w-full h-48 md:h-64 object-cover">
+                </div>
+
+                <div id="products-list" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    </div>
+
+                <div id="empty-shop" class="flex flex-col items-center justify-center py-20 text-center">
+                    <div class="text-5xl mb-4">👾</div>
+                    <p class="text-gray-400">Belum ada produk game yang ditambahkan oleh admin.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-admin" class="tab-content hidden">
+            <div id="admin-login-box" class="max-w-md mx-auto glass p-8 rounded-2xl shadow-xl mt-10">
+                <h3 class="text-xl font-bold mb-6 text-center text-purple-400">Login Administrator</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Username</label>
+                        <input type="text" id="login-user" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input type="password" id="login-pass" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-white">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-2.5 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg mt-2">
+                        Masuk Sistem
+                    </button>
+                </div>
+            </div>
+
+            <div id="admin-dashboard" class="hidden max-w-4xl mx-auto space-y-8">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-4">
+                    <h2 class="text-2xl font-bold text-sky-400">Control Panel Admin Top-Up</h2>
+                    <button onclick="handleLogout()" class="bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition-all text-sm">
+                        Keluar
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 space-y-6">
+                        <div class="glass p-5 rounded-xl space-y-4">
+                            <h3 class="font-semibold text-purple-400 border-b border-gray-800 pb-2">⚙️ Pengaturan Website</h3>
+                            
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Nama Toko / Web Top Up</label>
+                                <input type="text" id="sett-shop-name" oninput="updateShopName(this.value)" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Nomor WA Admin (Proses Orderan)</label>
+                                <input type="text" id="sett-shop-phone" placeholder="Contoh: 628123456789" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+                                <span class="text-[10px] text-gray-500">*Gunakan kode negara (62), jangan pakai 0 atau +.</span>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Link Banner Pop-Up Promo / Event</label>
+                                <input type="text" id="sett-popup-link" placeholder="https://..." class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Link Background Music (Direct MP3 Link)</label>
+                                <input type="text" id="sett-music-link" placeholder="https://...mp3" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-2">Mode Maintenance Website</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-1.5 cursor-pointer text-sm">
+                                        <input type="radio" name="maintenance" value="off" id="m-off" checked onchange="toggleMaintenance(false)"> OFF
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer text-sm text-amber-400">
+                                        <input type="radio" name="maintenance" value="on" id="m-on" onchange="toggleMaintenance(true)"> ON
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button onclick="saveGeneralSettings()" class="w-full bg-sky-600 text-sm py-2 rounded-lg font-medium hover:bg-sky-500 transition-all">
+                                Simpan Pengaturan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="glass p-5 rounded-xl">
+                            <h3 class="font-semibold text-purple-400 border-b border-gray-800 pb-2 mb-4">➕ Tambah Produk Item Game</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Nama Game</label>
+                                    <input type="text" id="prod-game-name" placeholder="Contoh: Mobile Legends, Free Fire" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Nominal / Item</label>
+                                    <input type="text" id="prod-item-name" placeholder="Contoh: 86 Diamonds, 500 Diamonds" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Harga Jual (Rp)</label>
+                                    <input type="number" id="prod-price" placeholder="Contoh: 20000" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Link Foto / Logo Game</label>
+                                    <input type="text" id="prod-img" placeholder="https://example.com/logo-game.png" class="w-full text-sm bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white">
+                                </div>
+                            </div>
+                            <button onclick="addProduct()" class="w-full bg-purple-600 text-sm py-2 rounded-lg font-medium hover:bg-purple-500 transition-all">
+                                Tambah ke Daftar Jualan
+                            </button>
+                        </div>
+
+                        <div class="glass p-5 rounded-xl">
+                            <h3 class="font-semibold text-gray-300 border-b border-gray-800 pb-2 mb-3">📋 List Item Game Aktif</h3>
+                            <div id="admin-products-list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="popup-banner" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="relative max-w-lg w-full glass rounded-2xl overflow-hidden p-2 border border-purple-500/30 scale-95 transition-transform duration-300" id="popup-box">
+            <button onclick="closePopup()" class="absolute top-4 right-4 bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold hover:bg-red-600 transition-all z-10">✕</button>
+            <img id="popup-img" src="" alt="Promo" class="w-full h-auto rounded-xl max-h-[70vh] object-contain">
+        </div>
+    </div>
+
+    <footer class="glass text-center py-4 text-xs text-gray-500 border-t border-gray-900 mt-10">
+        &copy; 2026 <span id="footer-brand">Sipira Topup</span>. All Rights Reserved.
+    </footer>
+
+    <script>
+        // Database LocalStorage State
+        let state = {
+            shopName: localStorage.getItem('shopName') || 'Sipira Topup',
+            shopPhone: localStorage.getItem('shopPhone') || '',
+            popupLink: localStorage.getItem('popupLink') || '',
+            musicLink: localStorage.getItem('musicLink') || '',
+            isMaintenance: localStorage.getItem('isMaintenance') === 'true',
+            products: JSON.parse(localStorage.getItem('products')) || []
+        };
+
+        let isLoggedIn = false;
+
+        window.onload = function() {
+            applyState();
+            checkAndShowPopup();
+        };
+
+        // Mengaplikasikan seluruh konfigurasi database
+        function applyState() {
+            // Update Nama Toko
+            document.title = state.shopName;
+            document.getElementById('brand-name').innerText = state.shopName;
+            document.getElementById('footer-brand').innerText = state.shopName;
+            document.getElementById('sett-shop-name').value = state.shopName;
+
+            // Update Nomer WA di Input Admin & Badge Navbar Toko (Tab 1)
+            document.getElementById('sett-shop-phone').value = state.shopPhone;
+            const waBadge = document.getElementById('shop-wa-badge');
+            if(state.shopPhone) {
+                document.getElementById('shop-wa-number').innerText = '+' + state.shopPhone;
+                waBadge.href = `https://wa.me/${state.shopPhone}?text=Halo%20Admin%20${encodeURIComponent(state.shopName)},%20saya%20mau%20tanya-tanya%20mengenai%20layanan%20top%20up%20game.`;
+                waBadge.classList.remove('hidden');
+                waBadge.classList.add('flex');
+            } else {
+                waBadge.classList.add('hidden');
+                waBadge.classList.remove('flex');
+            }
+
+            // Update Input Admin Setup Lainnya
+            document.getElementById('sett-popup-link').value = state.popupLink;
+            document.getElementById('sett-music-link').value = state.musicLink;
+            
+            // Audio Engine
+            const audio = document.getElementById('bg-music');
+            if(state.musicLink) {
+                if(audio.src !== state.musicLink) {
+                    audio.src = state.musicLink;
+                    document.body.addEventListener('click', () => { audio.play().catch(()=>{}) }, { once: true });
+                }
+            } else {
+                audio.pause();
+                audio.src = "";
+            }
+
+            // Maintenance Switcher
+            if(state.isMaintenance) {
+                document.getElementById('m-on').checked = true;
+                document.getElementById('maintenance-mode').style.display = 'flex';
+                document.getElementById('shop-content').style.display = 'none';
+            } else {
+                document.getElementById('m-off').checked = true;
+                document.getElementById('maintenance-mode').style.display = 'none';
+                document.getElementById('shop-content').style.display = 'block';
+            }
+
+            // Setup Main Hero Promo Banner
+            if(state.popupLink) {
+                document.getElementById('hero-banner-img').src = state.popupLink;
+                document.getElementById('hero-banner-container').classList.remove('hidden');
+            } else {
+                document.getElementById('hero-banner-container').classList.add('hidden');
+            }
+
+            renderProducts();
+        }
+
+        // Navigasi Antar Tab (Layar 1 & Layar 2)
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('btn-tab-shop').className = "px-4 py-2 rounded-lg font-medium text-gray-400 hover:text-white transition-all";
+            document.getElementById('btn-tab-admin').className = "px-4 py-2 rounded-lg font-medium text-gray-400 hover:text-white transition-all";
+
+            if (tab === 'shop') {
+                document.getElementById('tab-shop').classList.remove('hidden');
+                document.getElementById('btn-tab-shop').className = "px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md transition-all";
+            } else if (tab === 'admin') {
+                document.getElementById('tab-admin').classList.remove('hidden');
+                document.getElementById('btn-tab-admin').className = "px-4 py-2 rounded-lg font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md transition-all";
+                if(isLoggedIn) {
+                    document.getElementById('admin-login-box').classList.add('hidden');
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+                } else {
+                    document.getElementById('admin-login-box').classList.remove('hidden');
+                    document.getElementById('admin-dashboard').classList.add('hidden');
+                }
+            }
+        }
+
+        // Otentikasi Login Admin
+        function handleLogin() {
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+
+            if(user === 'admin' && pass === 'adm12') {
+                isLoggedIn = true;
+                document.getElementById('admin-login-box').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('login-user').value = '';
+                document.getElementById('login-pass').value = '';
+            } else {
+                alert('Username atau Password Admin Salah!');
+            }
+        }
+
+        function handleLogout() {
+            isLoggedIn = false;
+            switchTab('admin');
+        }
+
+        // Realtime update Text Nama Toko di Input Form
+        function updateShopName(val) {
+            state.shopName = val || 'Sipira Topup';
+            document.title = state.shopName;
+            document.getElementById('brand-name').innerText = state.shopName;
+            document.getElementById('footer-brand').innerText = state.shopName;
+            localStorage.setItem('shopName', state.shopName);
+        }
+
+        // Simpan Konfigurasi Umum Panel Admin
+        function saveGeneralSettings() {
+            let phoneInput = document.getElementById('sett-shop-phone').value.trim();
+            phoneInput = phoneInput.replace(/[^0-9]/g, ''); // bersihkan simbol
+
+            state.shopPhone = phoneInput;
+            state.popupLink = document.getElementById('sett-popup-link').value;
+            state.musicLink = document.getElementById('sett-music-link').value;
+            
+            localStorage.setItem('shopPhone', state.shopPhone);
+            localStorage.setItem('popupLink', state.popupLink);
+            localStorage.setItem('musicLink', state.musicLink);
+            
+            applyState();
+            alert('Pengaturan umum top up berhasil disimpan!');
+        }
+
+        function toggleMaintenance(status) {
+            state.isMaintenance = status;
+            localStorage.setItem('isMaintenance', status);
+            applyState();
+        }
+
+        // Manajemen Aset Produk Game
+        function renderProducts() {
+            const shopGrid = document.getElementById('products-list');
+            const adminList = document.getElementById('admin-products-list');
+            const emptyState = document.getElementById('empty-shop');
+
+            shopGrid.innerHTML = '';
+            adminList.innerHTML = '';
+
+            if(state.products.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+                
+                state.products.forEach((product, index) => {
+                    const formattedPrice = parseInt(product.price).toLocaleString('id-ID');
+                    
+                    // Format pesan WhatsApp untuk Top Up Game
+                    const textWA = `Halo Admin, saya mau Order Top Up Game:\n\n🎮 *Game:* ${product.gameName}\n💎 *Nominal/Item:* ${product.itemName}\n💰 *Harga:* Rp ${formattedPrice}\n\n📝 *Data Akun Anda (Isi Sendiri):*\n• ID/User ID:\n• Zone ID / Server:\n• Nickname:`;
+                    const waLink = state.shopPhone ? `https://wa.me/${state.shopPhone}?text=${encodeURIComponent(textWA)}` : '#';
+
+                    // Render untuk Tampilan Jualan Game (Tab 1)
+                    const prodCard = document.createElement('div');
+                    prodCard.className = "glass rounded-xl overflow-hidden shadow-lg hover:scale-[1.02] transition-all flex flex-col justify-between group border border-purple-900/20";
+                    prodCard.innerHTML = `
+                        <div class="relative overflow-hidden aspect-square bg-gray-900">
+                            <img src="${product.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'}" alt="${product.gameName}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <span class="absolute top-2 left-2 bg-purple-600 text-[10px] uppercase font-bold px-2 py-0.5 rounded text-white tracking-wider shadow">
+                                ${product.gameName}
+                            </span>
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow justify-between">
+                            <h4 class="font-bold text-sm text-gray-100 line-clamp-1 mb-1">${product.itemName}</h4>
+                            <p class="text-xs text-gray-400 mb-2">${product.gameName}</p>
+                            <div>
+                                <p class="text-sky-400 font-bold text-base">Rp ${formattedPrice}</p>
+                                <a href="${waLink}" target="${state.shopPhone ? '_blank' : '_self'}" onclick="${!state.shopPhone ? "alert('Nomor WA proses orderan belum di-set di panel admin!'); return false;" : ""}" class="block text-center w-full mt-3 bg-gradient-to-r from-purple-700 to-indigo-700 text-xs py-2 rounded-lg font-semibold group-hover:from-sky-500 group-hover:to-blue-600 transition-all text-white decoration-transparent shadow-md">
+                                    ⚡ Top Up
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    shopGrid.appendChild(prodCard);
+
+                    // Render untuk Tampilan List Manajemen di Admin (Tab 2)
+                    const adminRow = document.createElement('div');
+                    adminRow.className = "flex items-center justify-between p-2 bg-gray-900/50 rounded-lg border border-gray-800";
+                    adminRow.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="${product.image}" class="w-10 h-10 object-cover rounded bg-gray-800 border border-gray-700">
+                            <div>
+                                <p class="text-sm font-medium text-white">${product.itemName} <span class="text-xs text-gray-500">(${product.gameName})</span></p>
+                                <p class="text-xs text-sky-400">Rp ${formattedPrice}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteProduct(${index})" class="text-xs bg-red-900/40 text-red-400 border border-red-900 px-2 py-1 rounded hover:bg-red-600 hover:text-white transition-all">Hapus</button>
+                    `;
+                    adminList.appendChild(adminRow);
+                });
+            }
+        }
+
+        function addProduct() {
+            const gameName = document.getElementById('prod-game-name').value.trim();
+            const itemName = document.getElementById('prod-item-name').value.trim();
+            const price = document.getElementById('prod-price').value.trim();
+            const image = document.getElementById('prod-img').value.trim();
+
+            if(!gameName || !itemName || !price || !image) {
+                alert('Mohon isi semua data produk game (Nama Game, Item, Harga, & Link Foto)!');
+                return;
+            }
+
+            state.products.push({ gameName, itemName, price, image });
+            localStorage.setItem('products', JSON.stringify(state.products));
+            
+            // Reset fields
+            document.getElementById('prod-game-name').value = '';
+            document.getElementById('prod-item-name').value = '';
+            document.getElementById('prod-price').value = '';
+            document.getElementById('prod-img').value = '';
+
+            applyState();
+            alert('Item game berhasil ditambahkan ke katalog top up!');
+        }
+
+        function deleteProduct(index) {
+            if(confirm('Apakah Anda yakin ingin menghapus item game ini?')) {
+                state.products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(state.products));
+                applyState();
+            }
+        }
+
+        // Engine Pop-Up Banner Management
+        function checkAndShowPopup() {
+            if(state.popupLink) {
+                const modal = document.getElementById('popup-banner');
+                const box = document.getElementById('popup-box');
+                document.getElementById('popup-img').src = state.popupLink;
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    box.classList.remove('scale-95');
+                }, 100);
+            }
+        }
+
+        function closePopup() {
+            const modal = document.getElementById('popup-banner');
+            const box = document.getElementById('popup-box');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
